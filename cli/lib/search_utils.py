@@ -9,6 +9,7 @@ DATA_PATH = os.path.join(PROJECT_ROOT, "data", "movies.json")
 STOPWORDS_PATH = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
 CACHE_INDEX_PATH = os.path.join(PROJECT_ROOT, "cache", "index.pkl")
 CACHE_DOCMAP_PATH = os.path.join(PROJECT_ROOT, "cache", "docmap.pkl")
+CACHE_TERM_FREQUENCIES_PATH = os.path.join(PROJECT_ROOT, "cache", "term_frequencies.pkl")
 
 def load_movies():
     with open(DATA_PATH) as json_file:

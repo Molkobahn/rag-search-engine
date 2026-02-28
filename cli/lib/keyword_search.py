@@ -1,9 +1,9 @@
-from .search_utils import load_stopwords, load_movies, PROJECT_ROOT, CACHE_INDEX_PATH, CACHE_DOCMAP_PATH, DEFAULT_SEARCH_LIMIT
+from .search_utils import load_stopwords, load_movies, PROJECT_ROOT, CACHE_INDEX_PATH, CACHE_DOCMAP_PATH, DEFAULT_SEARCH_LIMIT, CACHE_TERM_FREQUENCIES_PATH
 import string
 from nltk.stem import PorterStemmer
 import pickle
 import os
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 
 class InvertedIndex:
@@ -11,6 +11,7 @@ class InvertedIndex:
     def __init__(self):
         self.index = defaultdict(set)
         self.docmap: dict[int, dict] = {}
+        self.term_frequencies: dict[int] = Counter()
 
 
     def __add_document(self, doc_id, text):
@@ -20,12 +21,25 @@ class InvertedIndex:
                 self.index[token] = set((doc_id,))
             else:
                 self.index[token].add(doc_id)
+            if doc_id not in self.term_frequencies:
+                self.term_frequencies[doc_id] = Counter(token=1)
+            else:
+                self.term_frequencies[doc_id][token] += 1
 
     
     def get_documents(self, term):
         ids = list(self.index[term.lower()])
         ids.sort()
         return ids
+    
+
+    def get_tf(self, doc_id, term):
+        token = tokenization(term)
+        if len(token) > 1:
+            raise Exception("More than one token")
+        doc = self.term_frequencies[doc_id]
+        return doc[token[0]]
+
     
 
     def build(self):
@@ -42,6 +56,8 @@ class InvertedIndex:
             pickle.dump(self.index, index_file)
         with open(CACHE_DOCMAP_PATH, 'wb+')as docmap_file:
             pickle.dump(self.docmap, docmap_file)
+        with open(CACHE_TERM_FREQUENCIES_PATH, 'wb+') as term_frequencies_file:
+            pickle.dump(self.term_frequencies, term_frequencies_file)
 
 
     def load(self):
@@ -55,6 +71,24 @@ class InvertedIndex:
                 self.docmap = pickle.load(docmap_file)
         except Exception as err:
             print(f"File not found: {err}")
+        try:
+            with open(CACHE_TERM_FREQUENCIES_PATH, "rb") as term_frequencies_file:
+                self.term_frequencies = pickle.load(term_frequencies_file)
+        except Exception as err:
+            print(f"File not found: {err}")
+
+
+def tf_command(doc_id, term):
+    idx = InvertedIndex()
+    try:
+        idx.load()
+    except Exception as err:
+        print(f"Couldn't load file: {err}")
+    res = idx.get_tf(doc_id, term)
+    if res == 0:
+        print(0)
+    else:
+        print(res)
 
 
 def build_command():
