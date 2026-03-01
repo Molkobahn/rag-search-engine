@@ -4,6 +4,7 @@ from nltk.stem import PorterStemmer
 import pickle
 import os
 from collections import defaultdict, Counter
+import math
 
 
 class InvertedIndex:
@@ -76,6 +77,16 @@ class InvertedIndex:
                 self.term_frequencies = pickle.load(term_frequencies_file)
         except Exception as err:
             print(f"File not found: {err}")
+
+
+def idf_command(term):
+    idx = InvertedIndex()
+    idx.load()
+    total_doc_count = len(idx.docmap)
+    term = tokenization(term)
+    term_match_doc_count = len(idx.index[term[0]])
+    idf = math.log((total_doc_count + 1) / (term_match_doc_count + 1))
+    return idf
 
 
 def tf_command(doc_id, term):

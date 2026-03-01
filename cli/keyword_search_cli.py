@@ -2,7 +2,7 @@
 
 import argparse
 
-from lib.keyword_search import search_command, build_command, tf_command
+from lib.keyword_search import search_command, build_command, tf_command, idf_command
 
 
 
@@ -19,6 +19,8 @@ def main() -> None:
     tf_parser.add_argument("doc_id", type=int, help="Document ID")
     tf_parser.add_argument("term", type=str, help="Search term")
 
+    idf_parser = subparsers.add_parser("idf", help="Get IDF value")
+    idf_parser.add_argument("term", type=str, help="Search term")
     args = parser.parse_args()
 
     match args.command:
@@ -33,6 +35,9 @@ def main() -> None:
             print("Inverrted index built successfully.")
         case "tf":
             tf_command(args.doc_id, args.term)
+        case "idf":
+            idf = idf_command(args.term)
+            print(f"Inverse document frequency of '{args.term}': {idf:.2f}")
         case _:
             parser.print_help()
 
