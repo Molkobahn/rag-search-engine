@@ -79,6 +79,15 @@ class InvertedIndex:
             print(f"File not found: {err}")
 
 
+def tfidf_command(doc_id, term):
+    idx = InvertedIndex()
+    idx.load()
+    tf = idx.get_tf(doc_id, term)
+    term = tokenization(term)
+    idf = math.log((len(idx.docmap) + 1) / (len(idx.index[term[0]]) + 1))
+    return tf * idf
+
+
 def idf_command(term):
     idx = InvertedIndex()
     idx.load()
