@@ -41,7 +41,16 @@ class InvertedIndex:
         doc = self.term_frequencies[doc_id]
         return doc[token[0]]
 
-    
+
+    def get_bm25_idf(self, term: str):
+        term = tokenization(term)
+        if len(term) > 1:
+            raise Exception ("More than one token")
+        n = len(self.docmap)
+        df = len(self.index[term[0]])
+        bm25_idf = math.log((n - df + 0.5) / (df + 0.5) + 1)
+        return bm25_idf
+
 
     def build(self):
         movies = load_movies()
@@ -77,6 +86,13 @@ class InvertedIndex:
                 self.term_frequencies = pickle.load(term_frequencies_file)
         except Exception as err:
             print(f"File not found: {err}")
+
+
+def bm25_idf_command(term):
+    idx = InvertedIndex()
+    idx.load()
+    bm25_idf = idx.get_bm25_idf(term)
+    return bm25_idf
 
 
 def tfidf_command(doc_id, term):
