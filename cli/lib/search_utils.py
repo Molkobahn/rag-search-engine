@@ -11,6 +11,8 @@ CACHE_INDEX_PATH = os.path.join(PROJECT_ROOT, "cache", "index.pkl")
 CACHE_DOCMAP_PATH = os.path.join(PROJECT_ROOT, "cache", "docmap.pkl")
 CACHE_TERM_FREQUENCIES_PATH = os.path.join(PROJECT_ROOT, "cache", "term_frequencies.pkl")
 
+BM25_K1 = 1.5
+
 def load_movies():
     with open(DATA_PATH) as json_file:
         movies_dict = json.load(json_file)

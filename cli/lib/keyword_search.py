@@ -1,4 +1,4 @@
-from .search_utils import load_stopwords, load_movies, PROJECT_ROOT, CACHE_INDEX_PATH, CACHE_DOCMAP_PATH, DEFAULT_SEARCH_LIMIT, CACHE_TERM_FREQUENCIES_PATH
+from .search_utils import load_stopwords, load_movies, PROJECT_ROOT, CACHE_INDEX_PATH, CACHE_DOCMAP_PATH, DEFAULT_SEARCH_LIMIT, CACHE_TERM_FREQUENCIES_PATH, BM25_K1
 import string
 from nltk.stem import PorterStemmer
 import pickle
@@ -52,6 +52,11 @@ class InvertedIndex:
         return bm25_idf
 
 
+    def get_bm25_tf(self, doc_id, term, k1=BM25_K1):
+        tf = self.get_tf(doc_id, term)
+        bm25_tf = (tf * (k1 + 1)) / (tf + k1)
+        return bm25_tf
+
     def build(self):
         movies = load_movies()
         for movie in movies:
@@ -86,6 +91,13 @@ class InvertedIndex:
                 self.term_frequencies = pickle.load(term_frequencies_file)
         except Exception as err:
             print(f"File not found: {err}")
+
+
+def bm25_tf_command(doc_id, term, k1=BM25_K1):
+    idx = InvertedIndex()
+    idx.load()
+    bm25_tf = idx.get_bm25_tf(doc_id, term, k1)
+    return bm25_tf
 
 
 def bm25_idf_command(term):
