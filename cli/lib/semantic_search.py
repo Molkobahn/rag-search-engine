@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import os
+import re
 from .search_utils import (
     CACHE_DIR,
     DEFAULT_SEARCH_LIMIT,
@@ -118,3 +119,30 @@ def search_command(query, limit=DEFAULT_SEARCH_LIMIT):
         print(f"{i}. {res['title']} (score:{res['score']})")
         print(f"   {res['description'][:100]}...\n")
         
+
+def chunk_command(text, chunk_size=200, overlap=0):
+    split_text = text.split()
+    chunks = []
+    for i in range(0, len(split_text), chunk_size):
+        if i >= chunk_size:
+            chunks.append(" ".join(split_text[i-overlap:i+chunk_size]))
+        else:
+            chunks.append(" ".join(split_text[i:i+chunk_size]))
+    for i, chunk in enumerate(chunks, 1):
+        print(f"Chunking {len(text)} characters")
+        print(f"{i}. {chunk}")
+        print()
+
+
+def semantic_chunk_command(text, max_chunk_size=4, overlap=0):
+    split_text = re.split(r"(?<=[.!?])\s+", text)
+    chunks = []
+    n = len(split_text)
+    i = 0
+    while i <= n:
+        chunk_words = split_text[i : i + max_chunk_size]
+        if chunks and len(chunk_words) <= overlap:
+            break
+        chunks.append(" ".join(chunk_words))
+        i += max_chunk_size - overlap
+    return chunks
