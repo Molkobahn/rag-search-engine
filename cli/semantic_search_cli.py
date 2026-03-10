@@ -9,9 +9,14 @@ from lib.semantic_search import (
     search_command,
     chunk_command,
     semantic_chunk_command,
+    embed_chunks_command,
+    search_chunked_command,
 )
 from lib.search_utils import(
-    DEFAULT_SEARCH_LIMIT
+    DEFAULT_SEARCH_LIMIT,
+    DEFAULT_CHUNK_SIZE,
+    DEFAULT_CHUNK_OVERLAP,
+    DEFAULT_SEMANTIC_CHUNK_SIZE,
 )
 
 def main():
@@ -34,14 +39,20 @@ def main():
 
     chunk_parser = subparsers.add_parser("chunk", help="Turn text into chunks")
     chunk_parser.add_argument("text", type=str, help="Text to be chunked")
-    chunk_parser.add_argument("--chunk-size", type=int, nargs="?", default=200, help="Tunable word limit for chunks")
-    chunk_parser.add_argument("--overlap", type=int, nargs="?", default=0, help="Tunable overlap arg")
+    chunk_parser.add_argument("--chunk-size", type=int, nargs="?", default=DEFAULT_CHUNK_SIZE, help="Tunable word limit for chunks")
+    chunk_parser.add_argument("--overlap", type=int, nargs="?", default=DEFAULT_CHUNK_OVERLAP, help="Tunable overlap arg")
 
     semantic_chunk_parser = subparsers.add_parser("semantic_chunk", help="Splits text into sentence chunks")
     semantic_chunk_parser.add_argument("text", type=str, help="Text to be chunked")
-    semantic_chunk_parser.add_argument("--max-chunk-size", type=int, nargs="?", default=4, help="Tunable max length for chunks")
-    semantic_chunk_parser.add_argument("--overlap", type=int, nargs="?", default=0, help="Tunable overlap option for chunks")
+    semantic_chunk_parser.add_argument("--max-chunk-size", type=int, nargs="?", default=DEFAULT_SEMANTIC_CHUNK_SIZE, help="Tunable max length for chunks")
+    semantic_chunk_parser.add_argument("--overlap", type=int, nargs="?", default=DEFAULT_CHUNK_OVERLAP, help="Tunable overlap option for chunks")
+
+    subparsers.add_parser("embed_chunks", help="Create embedded chunks") 
     
+    search_chunked_parser = subparsers.add_parser("search_chunked", help="Chunked search")
+    search_chunked_parser.add_argument("query", type=str, help="Search query for chunked search")
+    search_chunked_parser.add_argument("--limit", type=int, nargs="?", default=DEFAULT_SEARCH_LIMIT, help="Tunable limit for search")
+
     args = parser.parse_args()
 
     match args.command:
@@ -62,6 +73,10 @@ def main():
             print(f"Semantically chunking {len(args.text)} characters")
             for i, chunk in enumerate(chunks, 1):
                 print(f"{i}. {chunk}")
+        case "embed_chunks":
+            embed_chunks_command()
+        case "search_chunked":
+            search_chunked_command(args.query, args.limit)
         case _:
             parser.print_help()
         
